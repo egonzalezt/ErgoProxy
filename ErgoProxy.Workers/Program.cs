@@ -8,5 +8,6 @@ builder.Services.AddWorkerInfrastructure(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHostedService<UsersWorker>();
 builder.Services.AddHostedService<OperatorsWorker>();
+builder.Services.AddHostedService<DocumentsWorker>();
 var host = builder.Build();
 host.Run();

@@ -2,6 +2,7 @@
 
 using Domain.SharedKernel.Exceptions;
 using Domain.User;
+using ErgoProxy.Domain.Document;
 using ErgoProxy.Domain.Operator;
 using System.Text;
 
@@ -14,6 +15,21 @@ public static class DictionaryExtensions
         {
             var eventType = Encoding.UTF8.GetString((byte[])eventTypeHeader);
             if (!Enum.TryParse(eventType, true, out UserOperations operation))
+            {
+                throw new InvalidEventTypeException();
+            }
+            return operation;
+        }
+        throw new InvalidEventTypeException();
+    }
+
+    public static DocumentOperations GetDocumentEventType(this IDictionary<string, object> headers)
+    {
+        var key = headers.Keys.FirstOrDefault(k => string.Equals(k, "EventType", StringComparison.OrdinalIgnoreCase)) ?? throw new InvalidEventTypeException();
+        if (headers != null && headers.TryGetValue(key, out object eventTypeHeader))
+        {
+            var eventType = Encoding.UTF8.GetString((byte[])eventTypeHeader);
+            if (!Enum.TryParse(eventType, true, out DocumentOperations operation))
             {
                 throw new InvalidEventTypeException();
             }
