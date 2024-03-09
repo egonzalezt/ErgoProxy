@@ -1,0 +1,11 @@
+using ErgoProxy.Workers.ServiceCollection;
+using ErgoProxy.Workers.Workers;
+using ErgoProxy.Infrastructure.ServiceCollection;
+using ErgoProxy.HealthChecks.Extensions;
+var builder = Host.CreateApplicationBuilder(args);
+builder.Services.AddHealthChecksServices(builder.Configuration);
+builder.Services.AddWorkerInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHostedService<UsersWorkerV2>();
+var host = builder.Build();
+host.Run();
