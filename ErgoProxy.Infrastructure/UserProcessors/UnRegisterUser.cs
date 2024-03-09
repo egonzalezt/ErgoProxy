@@ -14,7 +14,7 @@ public class UnRegisterUser : IUserUseCaseSelector<UnRegisterUserDto>
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<GenericResponse> ExecuteAsync(UnRegisterUserDto body)
+    public async Task<GenericResponse<object>> ExecuteAsync(UnRegisterUserDto body)
     {
         var client = _httpClientFactory.CreateClient("GovCarpeta");
         var request = new HttpRequestMessage(HttpMethod.Delete, "/apis/unregisterCitizen");
@@ -23,6 +23,6 @@ public class UnRegisterUser : IUserUseCaseSelector<UnRegisterUserDto>
         var response = await client.SendAsync(request);
         var responseData = await response.Content.ReadAsStringAsync();
         var statusCode = (int)response.StatusCode;
-        return new GenericResponse() { Message = responseData, StatusCode = statusCode };
+        return new GenericResponse<object>() { Data = responseData, Message = responseData, StatusCode = statusCode };
     }
 }

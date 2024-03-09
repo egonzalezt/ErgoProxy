@@ -1,4 +1,4 @@
-﻿namespace ErgoProxy.Workers.Workers;
+﻿namespace ErgoProxy.Workers.Workers.Consumers;
 
 using HealthChecks;
 using Domain.SharedKernel.Exceptions;
@@ -8,18 +8,22 @@ using RabbitMQ.Client.Events;
 using System;
 using System.Text;
 using System.Text.Json;
+using Extensions;
+using ErgoProxy.Workers.Workers.Consumers.Options;
+using Microsoft.Extensions.Options;
 
-public class UsersWorkerV2 : BaseRabbitMQWorker
+public class UsersWorker : BaseRabbitMQWorker
 {
-    private readonly ILogger<UsersWorkerV2> _logger;
+    private readonly ILogger<UsersWorker> _logger;
     private readonly IServiceProvider _serviceProvider;
-    public UsersWorkerV2(
-        ILogger<UsersWorkerV2> logger,
-        IConnection rabbitConnection,
+    public UsersWorker(
+        ILogger<UsersWorker> logger,
+        ConnectionFactory rabbitConnection,
         IServiceProvider serviceProvider,
         IHealthCheckNotifier healthCheckNotifier,
-        SystemStatusMonitor statusMonitor
-    ) : base(logger, rabbitConnection, healthCheckNotifier, statusMonitor, "users_requests")
+        SystemStatusMonitor statusMonitor,
+        IOptions<QueuesConfiguration> queues
+    ) : base(logger, rabbitConnection.CreateConnection(), healthCheckNotifier, statusMonitor, queues.Value.RequestQueues.UserRequestQueue, queues.Value.ReplyQueues.UserReplyQueue)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
@@ -29,8 +33,9 @@ public class UsersWorkerV2 : BaseRabbitMQWorker
     {
         var body = eventArgs.Body.ToArray();
         var message = Encoding.UTF8.GetString(body);
-        var userId = GetHeaderValue(eventArgs.BasicProperties.Headers, "UserId");
-        var operation = GetEventType(eventArgs.BasicProperties.Headers);
+        var headers = eventArgs.BasicProperties.Headers;
+        var userId = headers.GetHeaderValue("UserId");
+        var operation = headers.GetUserEventType();
         _logger.LogInformation("Processing request for user {userId}", userId);
         switch (operation)
         {
@@ -50,44 +55,6 @@ public class UsersWorkerV2 : BaseRabbitMQWorker
         }
     }
 
-    private static UserOperations GetEventType(IDictionary<string, object> headers)
-    {
-        var key = headers.Keys.FirstOrDefault(k => string.Equals(k, "EventType", StringComparison.OrdinalIgnoreCase)) ?? throw new InvalidEventTypeException();
-        if (headers != null &&
-                    headers.TryGetValue(key, out object eventTypeHeader))
-        {
-            var eventType = Encoding.UTF8.GetString((byte[])eventTypeHeader);
-            if (!Enum.TryParse(eventType, true, out UserOperations operation))
-            {
-                throw new InvalidEventTypeException();
-            }
-            return operation;
-        }
-        throw new InvalidEventTypeException();
-    }
-
-    private static string GetHeaderValue(IDictionary<string, object> headers, string headerKey)
-    {
-        if (headers != null)
-        {
-            var key = headers.Keys.FirstOrDefault(k => string.Equals(k, headerKey, StringComparison.OrdinalIgnoreCase)) ?? throw new HeaderNotFoundException();
-
-            if (headers.TryGetValue(key, out object headerValue))
-            {
-                if (headerValue is byte[] byteArrayValue)
-                {
-                    return Encoding.UTF8.GetString(byteArrayValue);
-                }
-                else if (headerValue != null)
-                {
-                    return headerValue.ToString();
-                }
-            }
-        }
-
-        throw new HeaderNotFoundException();
-    }
-
     private async Task ExecuteUseCaseAsync<T>(T body, IModel channel, string userId) where T : class
     {
         using var scope = _serviceProvider.CreateScope();
@@ -102,6 +69,6 @@ public class UsersWorkerV2 : BaseRabbitMQWorker
                 };
         var properties = channel.CreateBasicProperties();
         properties.Headers = headers;
-        channel.BasicPublish("", "users_responses", properties, jsonBytes);
+        channel.BasicPublish("", _replyQueueName, properties, jsonBytes);
     }
 }

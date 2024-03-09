@@ -1,4 +1,4 @@
-﻿namespace ErgoProxy.Workers.Workers;
+﻿namespace ErgoProxy.Workers.Workers.Consumers;
 
 using HealthChecks.Events;
 using Domain.SharedKernel.Exceptions;
@@ -22,12 +22,15 @@ public abstract class BaseRabbitMQWorker : BackgroundService
     private bool _subscriptionCancelled = false;
     private string _consumerTag;
     internal readonly string _queueName;
+    internal readonly string _replyQueueName;
+
     public BaseRabbitMQWorker(
         ILogger logger,
         IConnection rabbitConnection,
         IHealthCheckNotifier healthCheckNotifier,
         SystemStatusMonitor statusMonitor,
-        string queueName
+        string queueName,
+        string replyQueue
     )
     {
         _logger = logger;
@@ -36,16 +39,16 @@ public abstract class BaseRabbitMQWorker : BackgroundService
         _statusMonitor = statusMonitor;
         _statusMonitor.SystemStatusChanged += OnSystemStatusChanged;
         _queueName = queueName;
+        _replyQueueName = replyQueue;
         _channel = _rabbitConnection.CreateModel();
-        _channel.QueueDeclare(queueName, durable: true, exclusive: false, autoDelete: false, arguments: new Dictionary<string, object>
-            {
-                { "x-message-ttl", 604800000 }
-            });
+        _channel = _rabbitConnection.CreateModel();
         _consumer = new EventingBasicConsumer(_channel);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("Subscribed to the queue {queue}", _queueName);
+        _logger.LogInformation("Reply queue {queue}", _replyQueueName);
         _consumer.Received += async (sender, eventArgs) =>
         {
 
@@ -70,7 +73,7 @@ public abstract class BaseRabbitMQWorker : BackgroundService
                 var properties = _channel.CreateBasicProperties();
                 properties.Headers = headers;
 
-                _channel.BasicPublish("", "users_responses", properties, Encoding.UTF8.GetBytes("Not Valid Body"));
+                _channel.BasicPublish("", _replyQueueName, properties, Encoding.UTF8.GetBytes("Not Valid Body"));
                 _logger.LogError(ex, "Invalid Body");
                 _channel.BasicAck(eventArgs.DeliveryTag, false);
             }
@@ -82,7 +85,7 @@ public abstract class BaseRabbitMQWorker : BackgroundService
                 };
                 var properties = _channel.CreateBasicProperties();
                 properties.Headers = headers;
-                _channel.BasicPublish("", "users_responses", properties, Encoding.UTF8.GetBytes("Not Valid Operation"));
+                _channel.BasicPublish("", _replyQueueName, properties, Encoding.UTF8.GetBytes("Not Valid Operation"));
                 _logger.LogError(ex, "Invalid EventType");
                 _channel.BasicAck(eventArgs.DeliveryTag, false);
             }
@@ -94,13 +97,9 @@ public abstract class BaseRabbitMQWorker : BackgroundService
                 };
                 var properties = _channel.CreateBasicProperties();
                 properties.Headers = headers;
-                _channel.BasicPublish("", "users_responses", properties, Encoding.UTF8.GetBytes("Not Valid Operation"));
+                _channel.BasicPublish("", _replyQueueName, properties, Encoding.UTF8.GetBytes("Not Valid Operation"));
                 _logger.LogError(ex, "Invalid EventType");
                 _channel.BasicAck(eventArgs.DeliveryTag, false);
-            }
-            catch (GovCarpetaApplicationErrorException ex)
-            {
-                _logger.LogError(ex, "GovCarpeta is not working");
             }
             catch (HttpRequestException ex)
             {
@@ -149,7 +148,7 @@ public abstract class BaseRabbitMQWorker : BackgroundService
     {
         if (subscribe)
         {
-            _logger.LogInformation("Subcribing to the channel {channel}", _queueName);
+            _logger.LogInformation("Subscribing to the channel {channel}", _queueName);
             _consumerTag = _channel.BasicConsume(_queueName, false, _consumer);
             _subscriptionCancelled = false;
         }

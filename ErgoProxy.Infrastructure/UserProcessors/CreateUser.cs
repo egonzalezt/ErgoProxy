@@ -14,7 +14,7 @@ public class CreateUser : IUserUseCaseSelector<CreateUserDto>
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<GenericResponse> ExecuteAsync(CreateUserDto body)
+    public async Task<GenericResponse<object>> ExecuteAsync(CreateUserDto body)
     {
         var client = _httpClientFactory.CreateClient("GovCarpeta");
         var request = new HttpRequestMessage(HttpMethod.Post, "/apis/registerCitizen");
@@ -23,6 +23,6 @@ public class CreateUser : IUserUseCaseSelector<CreateUserDto>
         var response = await client.SendAsync(request);
         var responseData = await response.Content.ReadAsStringAsync();
         var statusCode = (int)response.StatusCode;
-        return new GenericResponse() { Message = responseData, StatusCode = statusCode };
+        return new GenericResponse<object>() { Data = responseData ,Message = responseData, StatusCode = statusCode };
     }
 }
