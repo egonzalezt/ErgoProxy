@@ -5,13 +5,11 @@ using Options;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using ErgoProxy.Domain.Operator;
 using System.Text.Json;
 using System.Text;
 using ErgoProxy.Domain.Document;
 using ErgoProxy.Domain.SharedKernel.Exceptions;
 using ErgoProxy.Workers.Workers.Extensions;
-using ErgoProxy.Domain.User;
 
 public class DocumentsWorker : BaseRabbitMQWorker
 {

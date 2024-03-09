@@ -9,7 +9,7 @@ using System;
 using System.Text;
 using System.Text.Json;
 using Extensions;
-using ErgoProxy.Workers.Workers.Consumers.Options;
+using Options;
 using Microsoft.Extensions.Options;
 
 public class UsersWorker : BaseRabbitMQWorker
@@ -41,21 +41,21 @@ public class UsersWorker : BaseRabbitMQWorker
         {
             case UserOperations.CreateUser:
                 var createUserDto = JsonSerializer.Deserialize<CreateUserDto>(message) ?? throw new InvalidBodyException();
-                await ExecuteUseCaseAsync(createUserDto, channel, userId);
+                await ExecuteUseCaseAsync(createUserDto, channel, userId, operation);
                 break;
             case UserOperations.UnregisterUser:
                 var unregisterUserDto = JsonSerializer.Deserialize<UnRegisterUserDto>(message) ?? throw new InvalidBodyException();
-                await ExecuteUseCaseAsync(unregisterUserDto, channel, userId);
+                await ExecuteUseCaseAsync(unregisterUserDto, channel, userId, operation);
                 break;
             case UserOperations.VerifyUser:
                 break;
             default:
-                _logger.LogWarning("Not supported Operation: {0}", operation);
+                _logger.LogWarning("Not supported Operation: {0}", operation, operation);
                 throw new InvalidEventTypeException();
         }
     }
 
-    private async Task ExecuteUseCaseAsync<T>(T body, IModel channel, string userId) where T : class
+    private async Task ExecuteUseCaseAsync<T>(T body, IModel channel, string userId, UserOperations eventType) where T : class
     {
         using var scope = _serviceProvider.CreateScope();
         var useCaseSelector = scope.ServiceProvider.GetRequiredService<IUserUseCaseSelector<T>>();
@@ -66,6 +66,7 @@ public class UsersWorker : BaseRabbitMQWorker
                 {
                     { "ProcessFailed", false },
                     { "UserId", userId },
+                    { "EventType", eventType.ToString() }
                 };
         var properties = channel.CreateBasicProperties();
         properties.Headers = headers;
