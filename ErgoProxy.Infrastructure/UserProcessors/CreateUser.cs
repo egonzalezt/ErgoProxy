@@ -5,18 +5,11 @@ using Domain.User;
 using System.Text;
 using System.Text.Json;
 
-public class CreateUser : IUserUseCaseSelector<CreateUserDto>
+public class CreateUser(IHttpClientFactory httpClientFactory) : IUserUseCaseSelector<CreateUserDto>
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    public CreateUser(IHttpClientFactory httpClientFactory)
-    {
-        _httpClientFactory = httpClientFactory;
-    }
-
     public async Task<GenericResponse<object>> ExecuteAsync(CreateUserDto body)
     {
-        var client = _httpClientFactory.CreateClient("GovCarpeta");
+        var client = httpClientFactory.CreateClient("GovCarpeta");
         var request = new HttpRequestMessage(HttpMethod.Post, "/apis/registerCitizen");
         request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 

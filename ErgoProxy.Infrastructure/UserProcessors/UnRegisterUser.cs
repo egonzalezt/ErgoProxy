@@ -5,18 +5,11 @@ using Domain.User;
 using System.Text;
 using System.Text.Json;
 
-public class UnRegisterUser : IUserUseCaseSelector<UnRegisterUserDto>
+public class UnRegisterUser(IHttpClientFactory httpClientFactory) : IUserUseCaseSelector<UnRegisterUserDto>
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    public UnRegisterUser(IHttpClientFactory httpClientFactory)
-    {
-        _httpClientFactory = httpClientFactory;
-    }
-
     public async Task<GenericResponse<object>> ExecuteAsync(UnRegisterUserDto body)
     {
-        var client = _httpClientFactory.CreateClient("GovCarpeta");
+        var client = httpClientFactory.CreateClient("GovCarpeta");
         var request = new HttpRequestMessage(HttpMethod.Delete, "/apis/unregisterCitizen");
         request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 

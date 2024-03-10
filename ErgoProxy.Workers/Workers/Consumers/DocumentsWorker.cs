@@ -7,9 +7,9 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text.Json;
 using System.Text;
-using ErgoProxy.Domain.Document;
-using ErgoProxy.Domain.SharedKernel.Exceptions;
-using ErgoProxy.Workers.Workers.Extensions;
+using Domain.Document;
+using Domain.SharedKernel.Exceptions;
+using Extensions;
 
 public class DocumentsWorker : BaseRabbitMQWorker
 {

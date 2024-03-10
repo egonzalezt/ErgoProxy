@@ -6,18 +6,11 @@ using System.Text.Json;
 using System.Text;
 using Domain.SharedKernel.Responses;
 
-public class GetOperators : IOperatorUseCaseSelector<GetOperatorsDto>
+public class GetOperators(IHttpClientFactory httpClientFactory) : IOperatorUseCaseSelector<GetOperatorsDto>
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    public GetOperators(IHttpClientFactory httpClientFactory)
-    {
-        _httpClientFactory = httpClientFactory;
-    }
-
     public async Task<GenericResponse<object>> ExecuteAsync(GetOperatorsDto body)
     {
-        var client = _httpClientFactory.CreateClient("GovCarpeta");
+        var client = httpClientFactory.CreateClient("GovCarpeta");
         var request = new HttpRequestMessage(HttpMethod.Get, "/apis/getOperators");
         request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
         var response = await client.SendAsync(request);

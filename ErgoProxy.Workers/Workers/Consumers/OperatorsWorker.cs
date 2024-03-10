@@ -9,7 +9,7 @@ using Domain.Operator;
 using Domain.SharedKernel.Exceptions;
 using Extensions;
 using Microsoft.Extensions.Options;
-using ErgoProxy.Workers.Workers.Consumers.Options;
+using Options;
 
 internal class OperatorsWorker : BaseRabbitMQWorker
 {

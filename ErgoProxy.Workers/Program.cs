@@ -2,6 +2,7 @@ using ErgoProxy.Workers.ServiceCollection;
 using ErgoProxy.Infrastructure.ServiceCollection;
 using ErgoProxy.HealthChecks.Extensions;
 using ErgoProxy.Workers.Workers.Consumers;
+
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddHealthChecksServices(builder.Configuration);
 builder.Services.AddWorkerInfrastructure(builder.Configuration);

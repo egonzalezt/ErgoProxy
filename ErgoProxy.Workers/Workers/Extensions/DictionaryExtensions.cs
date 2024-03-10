@@ -2,8 +2,8 @@
 
 using Domain.SharedKernel.Exceptions;
 using Domain.User;
-using ErgoProxy.Domain.Document;
-using ErgoProxy.Domain.Operator;
+using Domain.Document;
+using Domain.Operator;
 using System.Text;
 
 public static class DictionaryExtensions
