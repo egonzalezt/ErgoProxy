@@ -47,6 +47,12 @@ public abstract class BaseRabbitMQWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await Task.Yield();
+        await SubscribeAsync(stoppingToken);
+    }
+
+    internal async Task SubscribeAsync(CancellationToken stoppingToken)
+    {
         _logger.LogInformation("Subscribed to the queue {queue}", _queueName);
         _logger.LogInformation("Reply queue {queue}", _replyQueueName);
         _consumer.Received += async (sender, eventArgs) =>
@@ -106,7 +112,6 @@ public abstract class BaseRabbitMQWorker : BackgroundService
                 {
                     _logger.LogError(ex, "Requeue the message because the external service is not available");
                     await _healthCheckNotifier.ReportUnhealthyServiceAsync("GovCarpeta", "The external service is not available", stoppingToken);
-                    _channel.BasicNack(eventArgs.DeliveryTag, false, true);
                 }
             }
             catch (Exception ex)
@@ -122,7 +127,6 @@ public abstract class BaseRabbitMQWorker : BackgroundService
             await Task.Delay(1000, stoppingToken);
         }
     }
-
 
     protected abstract Task ProcessMessageAsync(BasicDeliverEventArgs eventArgs, IModel channel);
 
