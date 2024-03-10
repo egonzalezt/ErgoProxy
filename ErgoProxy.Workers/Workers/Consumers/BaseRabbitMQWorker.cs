@@ -1,14 +1,14 @@
 ﻿namespace ErgoProxy.Workers.Workers.Consumers;
 
-using HealthChecks.Events;
 using Domain.SharedKernel.Exceptions;
-using HealthChecks;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Net;
 using System.Text.Json;
 using System.Text;
+using Frieren_Guard;
+using Frieren_Guard.Events;
 
 public abstract class BaseRabbitMQWorker : BackgroundService
 {

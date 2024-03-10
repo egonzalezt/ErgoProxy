@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ErgoProxy.Domain", "ErgoPro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ErgoProxy.Infrastructure", "ErgoProxy.Infrastructure\ErgoProxy.Infrastructure.csproj", "{84971CC9-D50A-4961-B779-4E6B726CF4D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ErgoProxy.HealthChecks", "ErgoProxy.HealthChecks\ErgoProxy.HealthChecks.csproj", "{0216317B-0A10-4B33-B4A8-4F449CD7D035}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +27,6 @@ Global
 		{84971CC9-D50A-4961-B779-4E6B726CF4D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84971CC9-D50A-4961-B779-4E6B726CF4D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84971CC9-D50A-4961-B779-4E6B726CF4D9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0216317B-0A10-4B33-B4A8-4F449CD7D035}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0216317B-0A10-4B33-B4A8-4F449CD7D035}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0216317B-0A10-4B33-B4A8-4F449CD7D035}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0216317B-0A10-4B33-B4A8-4F449CD7D035}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

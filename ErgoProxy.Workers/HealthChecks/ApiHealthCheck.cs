@@ -1,7 +1,6 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+﻿namespace ErgoProxy.Workers.HealthChecks;
 
-namespace ErgoProxy.HealthChecks;
-
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 public class ApiHealthCheck : IHealthCheck
 {

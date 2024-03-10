@@ -1,6 +1,5 @@
 ﻿namespace ErgoProxy.Workers.Workers.Consumers;
 
-using HealthChecks;
 using Domain.SharedKernel.Exceptions;
 using Domain.User;
 using RabbitMQ.Client;
@@ -11,6 +10,7 @@ using System.Text.Json;
 using Extensions;
 using Options;
 using Microsoft.Extensions.Options;
+using Frieren_Guard;
 
 public class UsersWorker : BaseRabbitMQWorker
 {

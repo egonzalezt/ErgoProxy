@@ -14,11 +14,11 @@
     <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="8.0.2" />
+    <PackageReference Include="Frieren-Guard" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ErgoProxy.Domain\ErgoProxy.Domain.csproj" />
-    <ProjectReference Include="..\ErgoProxy.HealthChecks\ErgoProxy.HealthChecks.csproj" />
     <ProjectReference Include="..\ErgoProxy.Infrastructure\ErgoProxy.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
