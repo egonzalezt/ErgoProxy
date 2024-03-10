@@ -56,7 +56,6 @@ public abstract class BaseRabbitMQWorker : BackgroundService
             {
                 _logger.LogInformation("New message received");
                 await ProcessMessageAsync(eventArgs, _channel);
-                _channel.BasicAck(eventArgs.DeliveryTag, false);
             }
             catch (JsonException ex)
             {

@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿namespace ErgoProxy.Domain.User;
 
-namespace ErgoProxy.Domain.User;
+using System.Text.Json.Serialization;
 
 public class UnRegisterUserDto
 {

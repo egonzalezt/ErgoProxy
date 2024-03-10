@@ -19,7 +19,7 @@ public static class ServiceCollectionExtensions
         var intervalMinutes = configuration.GetValue<int>("HealthChecks:IntervalMinutes");
         services.Configure<HealthCheckPublisherOptions>(options =>
         {
-            options.Period = TimeSpan.FromSeconds(intervalMinutes);
+            options.Period = TimeSpan.FromMinutes(intervalMinutes);
         });
         services.AddHealthChecks()
             .AddCheck<ApiHealthCheck>("api_check");

@@ -41,11 +41,11 @@ public class UsersWorker : BaseRabbitMQWorker
         {
             case UserOperations.CreateUser:
                 var createUserDto = JsonSerializer.Deserialize<CreateUserDto>(message) ?? throw new InvalidBodyException();
-                await ExecuteUseCaseAsync(createUserDto, channel, userId, operation);
+                await ExecuteUseCaseAsync(createUserDto, channel, userId, operation, eventArgs.DeliveryTag);
                 break;
             case UserOperations.UnregisterUser:
                 var unregisterUserDto = JsonSerializer.Deserialize<UnRegisterUserDto>(message) ?? throw new InvalidBodyException();
-                await ExecuteUseCaseAsync(unregisterUserDto, channel, userId, operation);
+                await ExecuteUseCaseAsync(unregisterUserDto, channel, userId, operation, eventArgs.DeliveryTag);
                 break;
             case UserOperations.VerifyUser:
                 break;
@@ -55,7 +55,7 @@ public class UsersWorker : BaseRabbitMQWorker
         }
     }
 
-    private async Task ExecuteUseCaseAsync<T>(T body, IModel channel, string userId, UserOperations eventType) where T : class
+    private async Task ExecuteUseCaseAsync<T>(T body, IModel channel, string userId, UserOperations eventType, ulong deliveryTag) where T : class
     {
         using var scope = _serviceProvider.CreateScope();
         var useCaseSelector = scope.ServiceProvider.GetRequiredService<IUserUseCaseSelector<T>>();
@@ -71,5 +71,6 @@ public class UsersWorker : BaseRabbitMQWorker
         var properties = channel.CreateBasicProperties();
         properties.Headers = headers;
         channel.BasicPublish("", _replyQueueName, properties, jsonBytes);
+        channel.BasicAck(deliveryTag, false);
     }
 }
