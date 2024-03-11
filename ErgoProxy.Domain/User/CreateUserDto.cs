@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿namespace ErgoProxy.Domain.User;
 
-namespace ErgoProxy.Domain.User;
+using System.Text.Json.Serialization;
 
 public class CreateUserDto
 {
@@ -13,7 +13,7 @@ public class CreateUserDto
     [JsonPropertyName("email")]
     public string Email { get; set; }
     [JsonPropertyName("operatorId")]
-    public int OperatorId { get; set; }
+    public string OperatorId { get; set; }
     [JsonPropertyName("operatorName")]
     public string OperatorName { get; set; }
 }
