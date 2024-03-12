@@ -8,6 +8,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["ErgoProxy.Workers/ErgoProxy.Workers.csproj", "ErgoProxy.Workers/"]
+COPY ["ErgoProxy.Domain/ErgoProxy.Domain.csproj", "ErgoProxy.Domain/"]
+COPY ["ErgoProxy.Infrastructure/ErgoProxy.Infrastructure.csproj", "ErgoProxy.Infrastructure/"]
 RUN dotnet restore "./ErgoProxy.Workers/./ErgoProxy.Workers.csproj"
 COPY . .
 WORKDIR "/src/ErgoProxy.Workers"
