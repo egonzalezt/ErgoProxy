@@ -10,6 +10,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHostedService<UsersWorker>();
 builder.Services.AddHostedService<OperatorsWorker>();
 builder.Services.AddHostedService<DocumentsWorker>();
+builder.Configuration.AddEnvironmentVariables();
 
 var host = builder.Build();
 host.Run();
