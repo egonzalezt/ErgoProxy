@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - develop
-
+env:
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  DEPLOYMENT_NAME: ergoproxy
+  IMAGE_NAME: ergoproxy
+  DOCKERFILE_LOCATION: ErgoProxy.Workers
 jobs:
   generate-version:
     runs-on: ubuntu-22.04
@@ -26,22 +30,47 @@ jobs:
           MINOR_STRING_TOKEN: "feat("
           PATCH_STRING_TOKEN: "fix("
           DEFAULT_BUMP: minor
-          
-  build-and-publish:
+  setup-build-publish-deploy:
     needs: generate-version
+    name: Setup, Build, Publish, and Deploy
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
-      - name: Code checkout
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+  
+      - name: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GKE_SA_KEY }}
+
+      - name: Get GKE Credentials
+        uses: google-github-actions/get-gke-credentials@v1
+        with:
+          cluster_name: ${{ secrets.CLUSTER }}
+          location: ${{ secrets.CLUSTER_ZONE }}
+  
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN  }}
-      - name: Build ErgoProxy and publish to Docker Hub
+      - name: Build ${{ env.IMAGE_NAME }} and publish to Docker Hub
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./ErgoProxy.Workers/Dockerfile
+          file: ./${{ env.DOCKERFILE_LOCATION }}/Dockerfile
           push: true
-          tags: egonzalezt/ergoproxy:latest, egonzalezt/ergoproxy:${{ needs.generate-version.outputs.new_tag }}
+          tags: egonzalezt/${{ env.IMAGE_NAME }}:latest, egonzalezt/${{ env.IMAGE_NAME }}:${{ needs.generate-version.outputs.new_tag }}
+  
+      # Deploy the Docker image to the GKE cluster
+      - name: Deploy
+        run: |-
+          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} ${{ env.DEPLOYMENT_NAME }}=egonzalezt/${{ env.IMAGE_NAME }}:${{ needs.generate-version.outputs.new_tag }}
+          kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }}
+      - name: Check deployment success
+        run: |
+          while [[ $(kubectl get deployment/${{ env.DEPLOYMENT_NAME }} -o 'jsonpath={..status.conditions[?(@.type=="Available")].status}') != "True" ]]; do sleep 5; done
+          while [[ $(kubectl get pods -l app=${{ env.DEPLOYMENT_NAME }} -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do sleep 5; done
