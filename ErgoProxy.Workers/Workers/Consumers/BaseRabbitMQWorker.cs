@@ -108,7 +108,7 @@ public abstract class BaseRabbitMQWorker : BackgroundService
             }
             catch (HttpRequestException ex)
             {
-                if (ex.StatusCode == HttpStatusCode.ServiceUnavailable)
+                if (ex.StatusCode == HttpStatusCode.ServiceUnavailable || ex.StatusCode == HttpStatusCode.InternalServerError)
                 {
                     _logger.LogError(ex, "Requeue the message because the external service is not available");
                     await _healthCheckNotifier.ReportUnhealthyServiceAsync("GovCarpeta", "The external service is not available", stoppingToken);
